@@ -25,6 +25,14 @@ public class ReminderContract {
         public static final String COLUMN_RADIUS = "radius";
         public static final String COLUMN_STATUS = "status";
         public static final String COLUMN_DATE_CREATED = "date_created";
+        public static final String COLUMN_ENABLED = "enabled"; // 1 = true, 0 = false
+        public static final String COLUMN_SNOOZE_UNTIL = "snooze_until";
+
+        public static Uri buildReminderUriWithId(long id) {
+            return CONTENT_URI.buildUpon()
+                    .appendPath(Long.toString(id))
+                    .build();
+        }
     }
 
 }

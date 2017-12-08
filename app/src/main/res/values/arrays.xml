@@ -1,13 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string-array name="radius_options">
-        <item>@string/option_5m</item>
         <item>@string/option_10m</item>
         <item>@string/option_50m</item>
         <item>@string/option_100m</item>
         <item>@string/option_500m</item>
         <item>@string/option_1km</item>
         <item>@string/option_5km</item>
-        <item>@string/option_10km</item>
     </string-array>
 </resources>

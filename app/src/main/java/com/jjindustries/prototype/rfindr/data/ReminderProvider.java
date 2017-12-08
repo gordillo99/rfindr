@@ -16,6 +16,7 @@ import com.jjindustries.prototype.rfindr.data.ReminderContract.ReminderEntry;
 public class ReminderProvider extends ContentProvider{
 
     public static final int CODE_REMINDER = 100;
+    public static final int CODE_SPECIFIC_REMINDER = 101;
 
     private static final UriMatcher sUriMatcher = buildUriMatcher();
     private ReminderDbHelper mOpenHelper;
@@ -25,6 +26,7 @@ public class ReminderProvider extends ContentProvider{
         final String authority = ReminderContract.CONTENT_AUTHORITY;
 
         matcher.addURI(authority, ReminderContract.PATH_REMINDER, CODE_REMINDER);
+        matcher.addURI(authority, ReminderContract.PATH_REMINDER + "/#", CODE_SPECIFIC_REMINDER);
         return matcher;
     }
 
@@ -51,7 +53,25 @@ public class ReminderProvider extends ContentProvider{
                         sortOrder);
 
                 break;
+
             }
+            case CODE_SPECIFIC_REMINDER:{
+                String normalizedUtcDateString = uri.getLastPathSegment();
+
+                String[] selectionArguments = new String[]{normalizedUtcDateString};
+
+                cursor = mOpenHelper.getReadableDatabase().query(
+
+                        ReminderEntry.TABLE_NAME,
+                        projection,
+                        ReminderEntry._ID + " = ? ",
+                        selectionArguments,
+                        null,
+                        null,
+                        sortOrder);
+                break;
+            }
+
 
             default:
                 throw new UnsupportedOperationException("Unknown uri: " + uri);
@@ -93,41 +113,48 @@ public class ReminderProvider extends ContentProvider{
 
     @Override
     public int delete(@NonNull Uri uri, String selection, String[] selectionArgs) {
-        int numRowsDeleted;
+        // Get access to the database and write URI matching code to recognize a single item
+        final SQLiteDatabase db = mOpenHelper.getWritableDatabase();
 
-        if (null == selection) selection = "1";
+        int match = sUriMatcher.match(uri);
+        // Keep track of the number of deleted tasks
+        int tasksDeleted; // starts as 0
 
-        switch (sUriMatcher.match(uri)) {
-            case CODE_REMINDER:
-                numRowsDeleted = mOpenHelper.getWritableDatabase().delete(
-                        ReminderEntry.TABLE_NAME,
-                        selection,
-                        selectionArgs);
-
+        // Write the code to delete a single row of data
+        // [Hint] Use selections to delete an item by its row ID
+        switch (match) {
+            // Handle the single item case, recognized by the ID included in the URI path
+            case CODE_SPECIFIC_REMINDER:
+                // Get the task ID from the URI path
+                String id = uri.getPathSegments().get(1);
+                // Use selections/selectionArgs to filter for this ID
+                tasksDeleted = db.delete(ReminderEntry.TABLE_NAME, ReminderEntry._ID + " = ? ", new String[]{id});
                 break;
-
             default:
                 throw new UnsupportedOperationException("Unknown uri: " + uri);
         }
 
-        /* If we actually deleted any rows, notify that a change has occurred to this URI */
-        if (numRowsDeleted != 0) {
+        // Notify the resolver of a change and return the number of items deleted
+        if (tasksDeleted != 0) {
+            // A task was deleted, set notification
             getContext().getContentResolver().notifyChange(uri, null);
         }
 
-        return numRowsDeleted;
+        // Return the number of tasks deleted
+        return tasksDeleted;
     }
 
     @Override
     public int update(@NonNull Uri uri, ContentValues values, String selection, String[] selectionArgs) {
         int numRowsUpdated;
         switch (sUriMatcher.match(uri)) {
-            case CODE_REMINDER:
+            case CODE_SPECIFIC_REMINDER:
+                String id = uri.getPathSegments().get(1);
                 numRowsUpdated = mOpenHelper.getWritableDatabase().update(
                         ReminderEntry.TABLE_NAME,
                         values,
-                        selection,
-                        selectionArgs
+                        ReminderEntry._ID + " = ? ",
+                        new String[]{id}
                 );
 
                 break;

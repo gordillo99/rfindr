@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
-<android.support.constraint.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/main_activity_container"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
@@ -15,11 +16,20 @@
         android:clipToPadding="false"
         android:paddingBottom="8dp"/>
 
+    <TextView
+        android:id="@+id/no_reminders_label_tv"
+        android:visibility="invisible"
+        android:text="@string/no_reminders_created_label"
+        android:textSize="30sp"
+        android:gravity="center"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent" />
+
     <ProgressBar
         android:id="@+id/pb_loading_indicator"
-        android:layout_width="42dp"
-        android:layout_height="42dp"
-        android:layout_gravity="center"
+        android:layout_width="50dp"
+        android:layout_height="50dp"
+        android:layout_gravity="center_vertical|center_horizontal"
         android:visibility="invisible" />
 
-</android.support.constraint.ConstraintLayout>
+</FrameLayout>
